@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ recept.nazev }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #fafafa;
+            color: #333;
+        }
+        a.back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #2980b9;
+            font-weight: 600;
+        }
+        a.back-link:hover {
+            text-decoration: underline;
+            color: #1c5980;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        img {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        p {
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        strong {
+            color: #555;
+        }
+        h3 {
+            margin-top: 30px;
+            margin-bottom: 10px;
+            color: #2980b9;
+            border-bottom: 2px solid #2980b9;
+            padding-bottom: 3px;
+        }
+        ul {
+            list-style: disc inside;
+            padding-left: 0;
+            margin-bottom: 30px;
+            color: #444;
+        }
+        ul li {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+    <a href="{% url 'recepty:index' %}" class="back-link">&larr; Zpět na seznam receptů</a>
+
+    <h1>{{ recept.nazev }}</h1>
+
+    {% if recept.obrazek %}
+    <img src="{{ recept.obrazek.url }}" alt="{{ recept.nazev }}">
+    {% endif %}
+
+    <p><strong>Kategorie:</strong> {{ recept.get_kategorie_display }}</p>
+    <p><strong>Obtížnost:</strong> {{ recept.get_obtiznost_display }}</p>
+    <p><strong>Doba přípravy:</strong> {{ recept.doba_pripravy }} minut</p>
+    <p><strong>Hodnocení:</strong> {{ recept.hodnoceni }}/5</p>
+
+    <h3>Postup:</h3>
+    <p>{{ recept.postup|linebreaks }}</p>
+
+    <h3>Suroviny:</h3>
+    <ul>
+        {% for surovina in recept.suroviny.all %}
+            <li>{{ surovina.mnozstvi }} {{ surovina.nazev }}</li>
+        {% empty %}
+            <li>Žádné suroviny nejsou uvedeny.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Seznam receptů</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        form {
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        input[type="text"], select {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            flex: 1;
+            min-width: 180px;
+        }
+        button {
+            padding: 8px 16px;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1c5980;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: white;
+            margin-bottom: 12px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            transition: box-shadow 0.2s ease;
+        }
+        li:hover {
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
+        a {
+            text-decoration: none;
+            color: #2980b9;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #1c5980;
+        }
+        .info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Seznam receptů</h1>
+
+    <form method="get">
+        <input type="text" name="q" placeholder="Hledat recept..." value="{{ request.GET.q }}">
+        
+        <select name="obtiznost">
+            <option value="">Všechny obtížnosti</option>
+            <option value="lehka" {% if request.GET.obtiznost == "lehka" %}selected{% endif %}>Lehká</option>
+            <option value="stredni" {% if request.GET.obtiznost == "stredni" %}selected{% endif %}>Střední</option>
+            <option value="tezka" {% if request.GET.obtiznost == "tezka" %}selected{% endif %}>Těžká</option>
+        </select>
+
+        <select name="razeni">
+            <option value="">Výchozí řazení</option>
+            <option value="hodnoceni" {% if request.GET.razeni == "hodnoceni" %}selected{% endif %}>Podle hodnocení</option>
+            <option value="obtiznost" {% if request.GET.razeni == "obtiznost" %}selected{% endif %}>Podle obtížnosti</option>
+        </select>
+
+        <button type="submit">Filtrovat</button>
+    </form>
+
+    <ul>
+        {% for recept in recepty %}
+        <li>
+            {% if recept.obrazek %}
+                <img src="{{ recept.obrazek.url }}" alt="{{ recept.nazev }}">
+            {% else %}
+                <div style="width: 60px; height: 60px; background: #ccc; border-radius: 6px; margin-right: 15px;"></div>
+            {% endif %}
+            <a href="{% url 'recepty:detail' recept.pk %}">{{ recept.nazev }}</a>
+            <div class="info">
+                Obtížnost: {{ recept.get_obtiznost_display }}, Čas: {{ recept.doba_pripravy }} min, Hodnocení: {{ recept.hodnoceni }}/5
+            </div>
+        </li>
+        {% empty %}
+        <li>Žádné recepty.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
