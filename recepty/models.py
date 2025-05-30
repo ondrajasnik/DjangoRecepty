@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Recept(models.Model):
     KATEGORIE_VOLBY = [
@@ -40,3 +41,16 @@ class Surovina(models.Model):
 
     def __str__(self):
         return f"{self.mnozstvi} {self.nazev}"
+
+class Recenze(models.Model):
+    recept = models.ForeignKey(Recept, related_name='recenze', on_delete=models.CASCADE)
+    uzivatel = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # volitelné
+    text = models.TextField()
+    hodnoceni = models.PositiveSmallIntegerField(
+        help_text="Hodnocení od 1 do 5",
+        choices=[(i, str(i)) for i in range(1, 6)]
+    )
+    datum = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Recenze k {self.recept.nazev} od {self.uzivatel} ({self.hodnoceni}/5)"
