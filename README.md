@@ -63,24 +63,3 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Aplikace bude dostupná na adrese `http://localhost:8000`
-
-## 👥 Přispívání
-
-Pokud chcete přispět k vývoji, postupujte následovně:
-
-1. Forkněte projekt
-2. Vytvořte vlastní branch (`git checkout -b feature/AmazingFeature`)
-3. Commitněte změny (`git commit -m 'Add some AmazingFeature'`)
-4. Pushněte do branch (`git push origin feature/AmazingFeature`)
-5. Otevřete Pull Request
-
-## 📝 Licence
-
-Tento projekt je licencován pod MIT licencí.
-
-## 📧 Kontakt
-
-Vaše jméno - [@váš_twitter](https://twitter.com/váš_twitter)
-
-Odkaz na projekt: [https://github.com/your-username/DjangoRecepty](https://github.com/your-username/DjangoRecepty) 
