@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if object %}Upravit recept{% else %}Nový recept{% endif %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #4285f4;
+            --accent-color: #fbbc04;
+            --text-color: #202124;
+            --bg-color: #ffffff;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-600: #6c757d;
+            --border-radius: 8px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-100);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            padding: 2rem;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-title {
+            font-family: 'Merriweather', serif;
+            font-size: 2rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .form-subtitle {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(26,115,232,0.1);
+        }
+
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-top: 0.5rem;
+        }
+
+        .error-text {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gray-300);
+            color: var(--gray-600);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .form-actions .btn {
+            flex: 1;
+        }
+
+        .messages {
+            list-style: none;
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+
+        .message-error {
+            background: #fff5f5;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+
+        .message-success {
+            background: #f0fff4;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <div class="form-header">
+                <h1 class="form-title">{% if object %}Upravit recept{% else %}Nový recept{% endif %}</h1>
+                <p class="form-subtitle">{% if object %}Upravte svůj recept{% else %}Přidejte nový recept do naší sbírky{% endif %}</p>
+            </div>
+
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li class="message message-{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.nazev.id_for_label }}">Název receptu</label>
+                    {{ form.nazev }}
+                    {% if form.nazev.errors %}
+                        <div class="error-text">{{ form.nazev.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.popis.id_for_label }}">Popis</label>
+                    {{ form.popis }}
+                    {% if form.popis.errors %}
+                        <div class="error-text">{{ form.popis.errors.0 }}</div>
+                    {% endif %}
+                    <div class="help-text">{{ form.popis.help_text }}</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Ingredience</label>
+                    {{ suroviny_formset.management_form }}
+                    <div id="suroviny-formset">
+                        {% for surovina_form in suroviny_formset %}
+                            <div class="surovina-form" style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                                <div style="flex: 2;">
+                                    {{ surovina_form.nazev }}
+                                    {% if surovina_form.nazev.errors %}
+                                        <div class="error-text">{{ surovina_form.nazev.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div style="flex: 1;">
+                                    {{ surovina_form.mnozstvi }}
+                                    {% if surovina_form.mnozstvi.errors %}
+                                        <div class="error-text">{{ surovina_form.mnozstvi.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                {% if surovina_form.instance.pk %}
+                                    {{ surovina_form.DELETE }}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-outline" style="margin-top: 1rem;" onclick="addSurovinaForm()">
+                        <i class="fas fa-plus"></i>
+                        Přidat další ingredienci
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.postup.id_for_label }}">Postup přípravy</label>
+                    {{ form.postup }}
+                    {% if form.postup.errors %}
+                        <div class="error-text">{{ form.postup.errors.0 }}</div>
+                    {% endif %}
+                    <div class="help-text">Podrobný postup přípravy, každý krok na nový řádek</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.doba_pripravy.id_for_label }}">Doba přípravy (minuty)</label>
+                    {{ form.doba_pripravy }}
+                    {% if form.doba_pripravy.errors %}
+                        <div class="error-text">{{ form.doba_pripravy.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.obtiznost.id_for_label }}">Obtížnost</label>
+                    {{ form.obtiznost }}
+                    {% if form.obtiznost.errors %}
+                        <div class="error-text">{{ form.obtiznost.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.obrazek.id_for_label }}">Obrázek receptu</label>
+                    {{ form.obrazek }}
+                    {% if form.obrazek.errors %}
+                        <div class="error-text">{{ form.obrazek.errors.0 }}</div>
+                    {% endif %}
+                    <div class="help-text">Nahrajte obrázek hotového pokrmu (volitelné)</div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'recepty:index' %}" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i>
+                        Zpět
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        {% if object %}Uložit změny{% else %}Vytvořit recept{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function addSurovinaForm() {
+            const formset = document.getElementById('suroviny-formset');
+            const totalForms = document.getElementById('id_suroviny-TOTAL_FORMS');
+            const currentForms = formset.getElementsByClassName('surovina-form');
+            const newForm = currentForms[0].cloneNode(true);
+            
+            // Update form index
+            const formRegex = RegExp(`suroviny-(\\d+)-`,'g');
+            const formNum = currentForms.length;
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `suroviny-${formNum}-`);
+            
+            // Clear input values
+            newForm.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+            
+            formset.appendChild(newForm);
+            totalForms.value = currentForms.length + 1;
+        }
+    </script>
+</body>
+</html> 

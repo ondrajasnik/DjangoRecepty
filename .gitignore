@@ -1,0 +1,7 @@
+# Virtuální prostředí
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
