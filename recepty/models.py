@@ -23,6 +23,7 @@ class Recept(models.Model):
     obtiznost = models.CharField(max_length=20, choices=OBTIZNOST_VOLBY)
     hodnoceni = models.FloatField(
         help_text="Hodnocení od 0 do 5",
+        default=0
     )
     doba_pripravy = models.PositiveIntegerField(help_text="Doba v minutách")
     obrazek = models.ImageField(upload_to='recepty/', blank=True, null=True)
@@ -38,7 +39,7 @@ class Recept(models.Model):
 
     def clean(self):
         from django.core.exceptions import ValidationError
-        if self.hodnoceni < 0 or self.hodnoceni > 5:
+        if self.hodnoceni is not None and (self.hodnoceni < 0 or self.hodnoceni > 5):
             raise ValidationError('Hodnocení musí být mezi 0 a 5.')
 
 class Surovina(models.Model):

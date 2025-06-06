@@ -49,29 +49,39 @@ SurovinaFormSet = forms.inlineformset_factory(
 )
 
 class ReceptForm(forms.ModelForm):
-    popis = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-        required=False,
-        help_text='Krátký popis receptu, který zaujme ostatní uživatele'
+    hodnoceni = forms.FloatField(
+        widget=forms.HiddenInput(),
+        initial=0,
+        required=False
     )
     
     class Meta:
         model = Recept
-        fields = ['nazev', 'popis', 'postup', 'kategorie', 'obtiznost', 'doba_pripravy', 'obrazek']
+        fields = ['nazev', 'postup', 'kategorie', 'obtiznost', 'doba_pripravy', 'obrazek', 'hodnoceni']
         widgets = {
             'nazev': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Např. Svíčková na smetaně'}),
             'postup': forms.Textarea(attrs={'class': 'form-control', 'rows': 10, 'placeholder': 'Popište postup přípravy krok za krokem...'}),
             'kategorie': forms.Select(attrs={'class': 'form-control'}),
             'obtiznost': forms.Select(attrs={'class': 'form-control'}),
             'doba_pripravy': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'obrazek': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            })
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['obrazek'].widget.attrs.update({'class': 'form-control'})
+        self.fields['obrazek'].required = False
         
     def clean_doba_pripravy(self):
         doba = self.cleaned_data.get('doba_pripravy')
         if doba < 1:
             raise forms.ValidationError('Doba přípravy musí být alespoň 1 minuta.')
         return doba
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if 'hodnoceni' not in cleaned_data:
+            cleaned_data['hodnoceni'] = 0
+        return cleaned_data

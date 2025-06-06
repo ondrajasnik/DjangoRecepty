@@ -207,6 +207,14 @@
             </ul>
             {% endif %}
 
+            {% if form.non_field_errors %}
+            <div class="error-text">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <form method="post" enctype="multipart/form-data" novalidate>
                 {% csrf_token %}
                 
@@ -219,20 +227,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="{{ form.popis.id_for_label }}">Popis</label>
-                    {{ form.popis }}
-                    {% if form.popis.errors %}
-                        <div class="error-text">{{ form.popis.errors.0 }}</div>
-                    {% endif %}
-                    <div class="help-text">{{ form.popis.help_text }}</div>
-                </div>
-
-                <div class="form-group">
                     <label class="form-label">Ingredience</label>
                     {{ suroviny_formset.management_form }}
                     <div id="suroviny-formset">
                         {% for surovina_form in suroviny_formset %}
                             <div class="surovina-form" style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                                {{ surovina_form.id }}
                                 <div style="flex: 2;">
                                     {{ surovina_form.nazev }}
                                     {% if surovina_form.nazev.errors %}
@@ -267,6 +267,14 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label" for="{{ form.kategorie.id_for_label }}">Kategorie</label>
+                    {{ form.kategorie }}
+                    {% if form.kategorie.errors %}
+                        <div class="error-text">{{ form.kategorie.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
                     <label class="form-label" for="{{ form.doba_pripravy.id_for_label }}">Doba přípravy (minuty)</label>
                     {{ form.doba_pripravy }}
                     {% if form.doba_pripravy.errors %}
@@ -284,11 +292,16 @@
 
                 <div class="form-group">
                     <label class="form-label" for="{{ form.obrazek.id_for_label }}">Obrázek receptu</label>
+                    {% if object and object.obrazek %}
+                        <div style="margin-bottom: 1rem;">
+                            <img src="{{ object.obrazek.url }}" alt="{{ object.nazev }}" style="max-width: 200px; border-radius: var(--border-radius);">
+                        </div>
+                    {% endif %}
                     {{ form.obrazek }}
                     {% if form.obrazek.errors %}
                         <div class="error-text">{{ form.obrazek.errors.0 }}</div>
                     {% endif %}
-                    <div class="help-text">Nahrajte obrázek hotového pokrmu (volitelné)</div>
+                    <div class="help-text">{% if object and object.obrazek %}Vyberte nový obrázek pouze pokud chcete současný změnit{% else %}Nahrajte obrázek hotového pokrmu (volitelné){% endif %}</div>
                 </div>
 
                 <div class="form-actions">

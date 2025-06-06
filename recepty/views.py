@@ -94,15 +94,26 @@ class ReceptCreateView(LoginRequiredMixin, CreateView):
         context = self.get_context_data()
         suroviny_formset = context['suroviny_formset']
         form.instance.autor = self.request.user
-        form.instance.hodnoceni = 0  # Výchozí hodnocení pro nový recept
-        self.object = form.save()
-        if suroviny_formset.is_valid():
+        
+        if form.is_valid() and suroviny_formset.is_valid():
+            self.object = form.save(commit=False)
+            if 'obrazek' in self.request.FILES:
+                self.object.obrazek = self.request.FILES['obrazek']
+                messages.success(self.request, f'Obrázek byl úspěšně nahrán: {self.object.obrazek.name}')
+            else:
+                messages.warning(self.request, 'Žádný obrázek nebyl nahrán')
+            self.object.save()
             suroviny_formset.instance = self.object
             suroviny_formset.save()
             messages.success(self.request, 'Recept byl úspěšně vytvořen!')
             return super().form_valid(form)
         else:
+            messages.error(self.request, f'Chyba ve formuláři: {form.errors}')
             return self.form_invalid(form)
+            
+    def form_invalid(self, form):
+        messages.error(self.request, f'Chyba ve formuláři: {form.errors}')
+        return super().form_invalid(form)
 
 class ReceptUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Recept
@@ -112,21 +123,43 @@ class ReceptUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['suroviny_formset'] = SurovinaFormSet(self.request.POST, instance=self.object)
+            context['suroviny_formset'] = SurovinaFormSet(
+                self.request.POST,
+                self.request.FILES,
+                instance=self.object,
+                prefix='suroviny'
+            )
         else:
-            context['suroviny_formset'] = SurovinaFormSet(instance=self.object)
+            context['suroviny_formset'] = SurovinaFormSet(
+                instance=self.object,
+                prefix='suroviny'
+            )
         return context
     
     def form_valid(self, form):
         context = self.get_context_data()
         suroviny_formset = context['suroviny_formset']
-        if suroviny_formset.is_valid():
+        
+        if not form.is_valid():
+            messages.error(self.request, f'Chyby v hlavním formuláři: {form.errors}')
+            return self.form_invalid(form)
+        
+        try:
+            # Uložíme hlavní formulář
             self.object = form.save()
-            suroviny_formset.instance = self.object
-            suroviny_formset.save()
-            messages.success(self.request, 'Recept byl úspěšně upraven!')
-            return super().form_valid(form)
-        else:
+            
+            # Zpracování ingrediencí
+            if suroviny_formset.is_valid():
+                # Uložíme formset - toto zachová existující suroviny a přidá nové
+                suroviny_formset.save()
+                messages.success(self.request, 'Recept byl úspěšně upraven!')
+                return redirect(self.object.get_absolute_url())
+            else:
+                messages.error(self.request, f'Chyby v ingrediencích: {suroviny_formset.errors}')
+                return self.form_invalid(form)
+            
+        except Exception as e:
+            messages.error(self.request, f'Chyba při ukládání: {str(e)}')
             return self.form_invalid(form)
     
     def test_func(self):
