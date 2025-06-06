@@ -31,6 +31,18 @@ class Recept(models.Model):
     vytvoreno = models.DateTimeField(auto_now_add=True)
     upraveno = models.DateTimeField(auto_now=True)
 
+    # Metadata
+    class Meta:
+        verbose_name = 'Recept'
+        verbose_name_plural = 'Recepty'
+        ordering = ['-vytvoreno']  # Řazení od nejnovějších
+        indexes = [
+            models.Index(fields=['nazev']),
+            models.Index(fields=['kategorie']),
+            models.Index(fields=['hodnoceni']),
+            models.Index(fields=['vytvoreno']),
+        ]
+
     def __str__(self):
         return self.nazev
 
@@ -47,15 +59,33 @@ class Surovina(models.Model):
     nazev = models.CharField(max_length=100)
     mnozstvi = models.CharField(max_length=50, blank=True)
 
+    class Meta:
+        verbose_name = 'Surovina'
+        verbose_name_plural = 'Suroviny'
+        ordering = ['id']  # Zachová pořadí, v jakém byly suroviny přidány
+        indexes = [
+            models.Index(fields=['nazev']),
+        ]
+
     def __str__(self):
         return f"{self.mnozstvi} {self.nazev}"
 
 class Recenze(models.Model):
     recept = models.ForeignKey('Recept', on_delete=models.CASCADE, related_name='recenze')
-    uzivatel = models.ForeignKey(User, on_delete=models.CASCADE)  # <- to musí být
+    uzivatel = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     hodnoceni = models.IntegerField()
     datum = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Recenze'
+        verbose_name_plural = 'Recenze'
+        ordering = ['-datum']  # Řazení od nejnovějších
+        indexes = [
+            models.Index(fields=['hodnoceni']),
+            models.Index(fields=['datum']),
+        ]
+        unique_together = ['recept', 'uzivatel']  # Jeden uživatel může přidat pouze jednu recenzi k receptu
 
     def __str__(self):
         return f"{self.uzivatel.username} ({self.hodnoceni}/5)"
